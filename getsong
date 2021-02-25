@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+####
+# getsong [ARGS]
+# 
+# plays the first 15 seconds of an audio file in VLC and uses songrec to 
+# find the song name
+# arguments:
+#       -f, --file: /path/to/file (default doublej stream)
+#       -r, --runtime: change the amount of time
+#                        to listen to the file (def. 15s)
+# Requirements:
+#       jq (bash tool for read json, sudo apt-get install jq)
+#       songrec (https://github.com/marin-m/SongRec)
+#       vlc (https://www.videolan.org/vlc/)
+
+
+#set defaults
+runtime="15"
+music_file="$HOME/Music/doublej.pls"
+
+
+#if command arguments given, set them
+POSITIONAL=()
+while [[ $# -gt 0 ]]
+do
+key="$1"
+
+case $key in
+    -f|--file)
+    music_file="$2"
+    shift # past argument
+    shift # past value
+    ;;
+    -r|--runtime)
+    runtime="$2"
+    shift # past argument
+    shift # past value
+    ;;
+esac
+done
+set -- "${POSITIONAL[@]}" # restore positional parameters
+
+
+
+#file to same recording wav and json from shazzam
+tmp_wav="/tmp/playing_now.wav"
+tmp_json="/tmp/playing_now.json"
+
+#long string to enocode file
+sout_str="#transcode{acodec=s16l,channels=2}:std{access=file,mux=wav,dst=$tmp_wav}"
+
+
+
+
+echo Please wait...
+#vlc command to record the runtime of the file
+vlc -I dummy --no-sout-video --sout-audio --no-sout-rtp-sap --no-sout-standard-sap --ttl=1 --sout-keep  --sout "#transcode{acodec=s16l,channels=2}:std{access=file,mux=wav,dst=$tmp_wav}" --run-time=$runtime $music_file vlc://quit &>/dev/null                    
+
+# read the temp recording, get the json from shazzam and dump to a file
+songrec audio-file-to-recognized-song $tmp_wav > $tmp_json
+
+
+#extract title, artist, and album
+title=$(jq '.track.title' "$tmp_json")
+artist=$(jq '.track.subtitle' "$tmp_json")
+album=$(jq ".track.sections | .[0].metadata | .[0].text" "$tmp_json")
+
+
+#print to terminal
+echo Listening to $title by $artist, on the ablum $album.
+
+echo "$title\$%\$$artist\$%\$$album">> ~/.local/share/SongRec/myhistory.csv
+
+
+

@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+
+import pyautogui as pyg
+import time
+
+
+
+current_x , current_y = pyg.position()
+
+print(f'X = {current_x} \t Y = {current_y}')
+
