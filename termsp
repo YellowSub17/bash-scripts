@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+
+
+
+wd=/home/pat/Documents/cloudstor/phd/python_projects/scorpy-pkg
+
+
+
+## Two monitors  
+##vim
+gnome-terminal --geometry=135x55+1281+0 --working-directory=$wd
+##ipy
+gnome-terminal --geometry=54x55+2647+0 --working-directory=$wd/scripts
+
+
+
+
+### One monitor
+###vim
+#gnome-terminal --geometry=135x55+0+0 --working-directory=$wd
+###ipy
+#gnome-terminal --geometry=54x55+1366+0 --working-directory=$wd/scripts
+
+
+
+kill -9 $PPID
+
+
+
+
+
